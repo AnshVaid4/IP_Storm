@@ -36,7 +36,9 @@ Aapikey=("916a56cee1091ad2d02129038af6bf8b4c59e3323a3f8285d78fc4864dd62a7a292f91
          "740e95aa8ac256d38c28fd09a1792b2a95f9368c800417f5fc61025488ba824c9a72830e998277e1" 
          "Db5bc08aac52577237e6bdc9c16a7f317e0ad527d00cd10cc157503490384c45e2e23e959b9d8e00" 
          "726f3d271fcbb94041046622d40f91f4ad72c49512be32e5eb04504b4774dce195a9c249064ded58" 
-         "5351bc3edb061f3d788ac1b86f0132e678d876a0ce2b8126aaae88db109ed8965a2630b79df4202a") 
+         "5351bc3edb061f3d788ac1b86f0132e678d876a0ce2b8126aaae88db109ed8965a2630b79df4202a"
+         "bbfecb36f12730e2c4a39e3a18388019e9cb28a059a94f30b83f58d2e317df801d22ad49452ac4ed"
+         "80a6fb7a0668ecd7dc6af2abd2848bb0c5fd426c036603a77af5e58365ccfd81ff02ec87e42a323c") 
 Acount=0
 
 echo -e "IP_Address","AbuseIPScore","VirustotalScore","VirustotalAgents","CountryCode","CountryName","ISP","Domain","IsPublic","IPversion","IsWhitelisted","UsageType","Hostnames","TotalReports","NumberOfDistictUsers","LastReportedAt","ReportedAt","Categories","ReportedID","ReporterCountryCode","ReporterCountryName\n"  >> IP_Abuseip_Stats.csv
@@ -56,18 +58,40 @@ while read line; do
     fi
     if ! [[ "$s" =~ ^[0-9]+$ ]]
     then
-           #Acount=$(( Acount+1 ))
-           s=$(curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount]}"   -H "Accept: application/json" | jq -r '.data.abuseConfidenceScore' temp.json)
+    	   curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount+1]}"   -H "Accept: application/json" > temp.json
+           s=$(curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount+1]}"   -H "Accept: application/json" | jq -r '.data.abuseConfidenceScore' temp.json)
+           Acount=1
 	   if ! [[ "$s" =~ ^[0-9]+$ ]] #checking if another key is also not giving null value. Otherwise using another key
            then
-                Acount=$(( Acount+1 ))
-                s=$(curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount]}"   -H "Accept: application/json" | jq -r '.data.abuseConfidenceScore' temp.json) 
-
-
+           	curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount+1]}"   -H "Accept: application/json" > temp.json
+                s=$(jq -r '.data.abuseConfidenceScore' temp.json) 
+		Acount=$(( Acount+1 ))
+		
 		if ! [[ "$s" =~ ^[0-9]+$ ]] #checking if another key is also not giving null value. Otherwise using another key
                 then
+                	curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount+1]}"   -H "Accept: application/json" > temp.json
+                        s=$(jq -r '.data.abuseConfidenceScore' temp.json)
                         Acount=$(( Acount+1 ))
-                        s=$(curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount]}"   -H "Accept: application/json" | jq -r '.data.abuseConfidenceScore' temp.json)
+                        
+                        if ! [[ "$s" =~ ^[0-9]+$ ]] #checking if another key is also not giving null value. Otherwise using another key
+		        then
+		        	curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount+1]}"   -H "Accept: application/json" > temp.json
+		                s=$(jq -r '.data.abuseConfidenceScore' temp.json)
+		                Acount=$(( Acount+1 ))
+		                if ! [[ "$s" =~ ^[0-9]+$ ]] #checking if another key is also not giving null value. Otherwise using another key
+				then
+					curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount+1]}"   -H "Accept: application/json" > temp.json
+				        s=$(jq -r '.data.abuseConfidenceScore' temp.json)
+				        Acount=$(( Acount+1 ))
+				        if ! [[ "$s" =~ ^[0-9]+$ ]] #checking if another key is also not giving null value. Otherwise using another key
+					then
+						curl -G https://api.abuseipdb.com/api/v2/check   --data-urlencode "ipAddress=$line"   -d maxAgeInDays=90   -d verbose   -H "Key: ${Aapikey[$Acount+1]}"   -H "Accept: application/json" > temp.json
+						s=$(jq -r '.data.abuseConfidenceScore' temp.json)
+						Acount=$(( Acount+1 ))
+						
+					fi
+				fi
+		        fi
 
                 fi
            fi
@@ -189,24 +213,29 @@ while read line; do
     echo $s
     if ! [[ "$s" =~ ^[0-9]+$ ]]
     then
-           Vcount=$(( Vcount+1 ))
-           s=$(curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' | jq -r '.data.attributes.last_analysis_stats.malicious')
            curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' > temp2.json
+           s=$(jq -r '.data.attributes.last_analysis_stats.malicious' temp2.json)
+           Vcount=$((  Vcount+1 ))
            if ! [[ "$s" =~ ^[0-9]+$ ]]  #checking if another key is also not giving null value. Otherwise using another key
            then
-                Vcount=$(( Vcount+1 ))
-                s=$(curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' | jq -r '.data.attributes.last_analysis_stats.malicious')
                 curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' > temp2.json
-
+		s=$( jq -r '.data.attributes.last_analysis_stats.malicious' temp2.json)
+		Vcount=$((  Vcount+1 ))
 
                 if ! [[ "$s" =~ ^[0-9]+$ ]]  #checking if another key is also not giving null value. Otherwise using another key
                 then
-                        Vcount=$(( Vcount+1 ))
-                        s=$(curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' | jq -r '.data.attributes.last_analysis_stats.malicious')
                         curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' > temp2.json
+			s=$( jq -r '.data.attributes.last_analysis_stats.malicious' temp2.json)
+			Vcount=$((  Vcount+1 ))
+			if ! [[ "$s" =~ ^[0-9]+$ ]]  #checking if another key is also not giving null value. Otherwise using another key
+					then
+						curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' > temp2.json
+						s=$( jq -r '.data.attributes.last_analysis_stats.malicious' temp2.json)
+						Vcount=$((  Vcount+1 ))
+					fi
 
+                        fi
                 fi
-           fi
     fi
 #=========================================================================== IF ONE KEY FAILS THEN OTHER KEY WILL BE USED
 #REMOVE FOR LOOP
