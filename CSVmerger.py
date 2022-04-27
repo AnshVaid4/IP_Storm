@@ -3,13 +3,13 @@ import csv
 
 nf=""
 file =  open("MyFile.txt","a")
-with open('C:\\Users\\Ansh Vaid\\Desktop\\IP_Abuseip_Stats.csv') as fileObjectAB:
+with open('IP_Abuseip_Stats.csv') as fileObjectAB:
     reader_objAB = csv.reader(fileObjectAB)
     for ABrow in reader_objAB:
         flag=0
         ABip=ABrow[0]
         #print(ABip)
-        with open('C:\\Users\\Ansh Vaid\\Desktop\\Virustotal_Stats.csv') as fileObjectVT:
+        with open('Virustotal_Stats.csv') as fileObjectVT:
             reader_objVT = csv.reader(fileObjectVT)
             for VTrow in reader_objVT:
                 VTip=VTrow[0]
