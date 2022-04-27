@@ -6,23 +6,25 @@ rm -rf Filtered_Sorted_IPdump IP_Abuseip_Stats.csv Virustotal_Stats.csv
 echo "[!] Enter the name of wireshark file"
 read wfile
 
-echo -e "\n[+] Fetching source IPs"
-tshark -nr $wfile -T fields -e ip.src > ipdump
+echo -e "\n[!] Enter the name of wireshark file"
+read proxyip
 
-echo -e "\n[+] Fetching destination IPs"
-tshark -nr $wfile -T fields -e ip.dst >> ipdump
+echo -e "\n[+] Fetching source IPv4"
+tshark   -r lenov-initial.pcapng 'ip.addr=='$proxyip | awk '{$1=$1};1' | cut -d" " -f3 > ipdump
+
+echo -e "\n[+] Fetching destination IPv4"
+tshark   -r lenov-initial.pcapng 'ip.addr=='$proxyip | awk '{$1=$1};1' | cut -d" " -f5 >> ipdump
+
 
 echo -e "\n[+] Removing blank lines"
 sed -i '/^$/d' ipdump
 
-echo -e "\n[+] Finalizing"
-cat ipdump | cut -d "," -f1 > FilteredSortedIPdump
 
 echo -e "\n[+] Sorting and removing duplicate IPs"
-cat FilteredSortedIPdump | sort | uniq > Filtered_Sorted_IPdump
-cat "end" >> Filtered_Sorted_IPdump
+cat ipdump | sort | uniq > Filtered_Sorted_IPdump
 
-rm -rf ipdump FilteredSortedIPdump
+echo "end" >> Filtered_Sorted_IPdump
+rm -rf ipdump 
 
 rm -rf IP_Virustotal_Stats
 rm -rf temp.json temp2.json
