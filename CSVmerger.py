@@ -2,7 +2,7 @@
 import csv
 
 nf=""
-file =  open("Final.txt","a")
+file =  open("Final.csv","a")
 with open('IP_Abuseip_Stats.csv') as fileObjectAB:
     reader_objAB = csv.reader(fileObjectAB)
     for ABrow in reader_objAB:
