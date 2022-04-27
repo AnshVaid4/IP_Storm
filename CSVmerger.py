@@ -23,4 +23,4 @@ with open('IP_Abuseip_Stats.csv') as fileObjectAB:
                 ABs=(",".join(ABrow))+"\n"
                 file.write(ABs)
 file.close()
-            
+print("Check Final.csv")            
