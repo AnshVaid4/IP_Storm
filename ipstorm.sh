@@ -10,10 +10,10 @@ echo -e "\n[!] Enter the name of wireshark file"
 read proxyip
 
 echo -e "\n[+] Fetching source IPv4"
-tshark   -r lenov-initial.pcapng 'ip.addr=='$proxyip | awk '{$1=$1};1' | cut -d" " -f3 > ipdump
+tshark   -r $wfile 'ip.src=='$proxyip | awk '{$1=$1};1' | cut -d" " -f5 > ipdump
 
 echo -e "\n[+] Fetching destination IPv4"
-tshark   -r lenov-initial.pcapng 'ip.addr=='$proxyip | awk '{$1=$1};1' | cut -d" " -f5 >> ipdump
+tshark   -r $wfile 'ip.dst=='$proxyip | awk '{$1=$1};1' | cut -d" " -f3 >> ipdump
 
 
 echo -e "\n[+] Removing blank lines"
@@ -23,11 +23,12 @@ sed -i '/^$/d' ipdump
 echo -e "\n[+] Sorting and removing duplicate IPs"
 cat ipdump | sort | uniq > Filtered_Sorted_IPdump
 
-echo "end" >> Filtered_Sorted_IPdump
+echo $proxyip >> Filtered_Sorted_IPdump
 rm -rf ipdump 
 
 rm -rf IP_Virustotal_Stats
 rm -rf temp.json temp2.json
+
 
 
 #=========AbuseIP
