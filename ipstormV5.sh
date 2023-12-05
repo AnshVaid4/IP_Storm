@@ -6,7 +6,7 @@ rm -rf Filtered_Sorted_IPdump IP_Abuseip_Stats.csv Virustotal_Stats.csv
 echo "[!] Enter the name of wireshark file"
 read wfile
 
-echo -e "\n[!] Enter the name of wireshark file"
+echo -e "\n[!] Enter the IP adress whose communication needs to be traced"
 read proxyip
 
 echo -e "\n[+] Fetching source IPv4"
