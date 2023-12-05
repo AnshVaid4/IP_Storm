@@ -216,9 +216,11 @@ while read line; do
     echo $s
     if ! [[ "$s" =~ ^[0-9]+$ ]]
     then
+    	   Vcount=$((  Vcount+1 ))
            curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' > temp2.json
            s=$(jq -r '.data.attributes.last_analysis_stats.malicious' temp2.json)
-           Vcount=$((  Vcount+1 ))
+	   #Vcount=$((  Vcount+1 ))
+    
            if ! [[ "$s" =~ ^[0-9]+$ ]]  #checking if another key is also not giving null value. Otherwise using another key
            then
                 curl --request GET --url https://www.virustotal.com/api/v3/ip_addresses/$line --header 'x-apikey: '${Vapikey[$Vcount]}'' > temp2.json
